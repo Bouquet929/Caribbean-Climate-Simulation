@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CC-Guard | Caribbean Climate Crisis Simulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: url('https://images.pexels.com/photos/32745742/pexels-photo-32745742.jpeg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 100px;
+      height: 100px;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMwIiBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9IjAuMyIvPgo8cGF0aCBkPSJtNTAgMjBsLTE1IDE1aDMwbC0xNS0xNVoiIGZpbGw9IiNmZmYwMDAiLz4KPHBhdGggZD0ibTUwIDQwbC0xMCAxMGgzMGwtMTAtMTBaIiBmaWxsPSIjZmZmZmZmIi8+CjwvZz4KPC9zdmc+') no-repeat center;
+      background-size: contain;
+      z-index: 1;
+      opacity: 0.7;
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+    .glassmorphism::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      border-radius: 25px;
+      pointer-events: none;
+    }
+    .tropical-shadow {
+      box-shadow: 0 10px 30px rgba(0, 119, 190, 0.3), 0 4px 15px rgba(0, 206, 209, 0.2);
+    }
+    .wave-animation {
+      animation: wave 10s ease-in-out infinite;
+    }
+    @keyframes wave {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .coral-button {
+      background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+    }
+    .coral-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+    }
+    .jungle-green {
+      background: linear-gradient(135deg, #40e0d0 0%, #228b22 100%);
+    }
+    .tropical-icon {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+    }
+    select {
+      color: #0f172a;
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    select option {
+      color: #0f172a;
+      background-color: #ffffff;
+    }
+    select option:checked,
+    select option:hover {
+      color: #0f172a;
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100">
+  <!-- Left flanking panel - Land drought crisis -->
+  <div class="fixed left-0 top-0 h-full w-32 z-0 opacity-80">
+    <div class="h-full bg-cover bg-center" style="background-image: url('https://images.pexels.com/photos/13652006/pexels-photo-13652006.jpeg');"></div>
+  </div>
+  <!-- Right flanking panel - Land hurricane crisis -->
+  <div class="fixed right-0 top-0 h-full w-32 z-0 opacity-80">
+    <div class="h-full bg-cover bg-center" style="background-image: url('https://images.pexels.com/photos/4170432/pexels-photo-4170432.jpeg');"></div>
+  </div>
+  <!-- Tropical decorations -->
+  <div class="fixed top-10 left-10 z-0 opacity-20 floating">
+    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#ffd700"/>
+    </svg>
+  </div>
+  <div class="fixed bottom-20 right-20 z-0 opacity-15 wave-animation">
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4L19 9ZM12 11C13.66 11 15 12.34 15 14C15 15.66 13.66 17 12 17C10.34 17 9 15.66 9 14C9 12.34 10.34 11 12 11Z" fill="#00ced1"/>
+    </svg>
+  </div>
+  <div class="fixed top-1/2 left-5 z-0 opacity-10 floating" style="animation-delay: 2s;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#50c878"/>
+    </svg>
+  </div>
+  <div class="mx-auto max-w-6xl px-4 py-8 relative z-10">
+    <header class="mb-8 rounded-3xl glassmorphism tropical-shadow p-8 relative overflow-hidden">
+      <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('https://images.unsplash.com/photo-1639575984844-5f411d35d231');"></div>
+      <div class="relative z-10 flex items-center gap-4">
+        <div class="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-400 to-yellow-400 text-white tropical-shadow">
+          <span class="text-4xl">🏝️</span>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-300" id="appSubTitle">Caribbean Climate Guard Simulation System</p>
+          <h1 class="mt-3 text-4xl font-semibold text-white" id="appTitle">Caribbean Climate Crisis Simulation</h1>
+          <p class="mt-2 max-w-2xl text-slate-200" id="appDescription">Build an immersive command-center experience to assess climate risk for Caribbean educational institutions and generate teaching and emergency response plans.</p>
+        </div>
+        <div class="shrink-0 text-right text-sm text-slate-300">
+          <p id="producerLabel" class="font-medium text-white">Producer：Shen Haotian</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid gap-6 rounded-3xl glassmorphism tropical-shadow p-6 relative overflow-hidden">
+      <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('https://images.unsplash.com/photo-1640107559765-ee613a31c723');"></div>
+      <div class="relative z-10 space-y-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-sm uppercase tracking-[0.25em] text-slate-300" id="step1Label">STEP 1</p>
+            <h2 class="text-2xl font-semibold text-white" id="step1Title">Select Simulation Depth</h2>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="rounded-full glassmorphism px-4 py-2 text-sm text-slate-200" id="styleBadge">Emergency Command Center Aesthetic</div>
+            <button id="langToggleBtn" type="button" class="rounded-full glassmorphism px-4 py-2 text-sm text-white transition hover:bg-white/20">中文</button>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <button id="basicModeBtn" class="rounded-3xl glassmorphism tropical-shadow px-6 py-5 text-left transition hover:scale-105">
+            <p id="basicCardMode" class="text-sm uppercase tracking-[0.2em] text-slate-300">Basic Resilience Quick-Check Mode</p>
+            <p id="basicCardSubtitle" class="mt-3 text-lg font-semibold text-white">Quick Resilience Scan</p>
+            <p id="basicCardDesc" class="mt-2 text-slate-200">Quickly evaluate institutional risk and emergency response readiness.</p>
+          </button>
+          <button id="fullModeBtn" class="rounded-3xl glassmorphism tropical-shadow px-6 py-5 text-left transition hover:scale-105">
+            <p id="fullCardMode" class="text-sm uppercase tracking-[0.2em] text-slate-300">Full-Dimensional Risk Simulation Mode</p>
+            <p id="fullCardSubtitle" class="mt-3 text-lg font-semibold text-white">Comprehensive Risk Decision</p>
+            <p id="fullCardDesc" class="mt-2 text-slate-200">Introduce terrain and seasonal variables for a comprehensive crisis forecast.</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="formSection" class="mt-8 hidden rounded-3xl glassmorphism tropical-shadow p-6">
+      <div class="mb-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-sm uppercase tracking-[0.25em] text-slate-300" id="step2Label">STEP 2</p>
+            <h2 class="text-2xl font-semibold text-white" id="step2Title">Input Environmental & Educational Variables</h2>
+          </div>
+          <span id="modeLabel" class="rounded-full glassmorphism px-4 py-2 text-sm text-white">Mode: Basic</span>
+        </div>
+      </div>
+      <form id="simulationForm" class="grid gap-4 lg:grid-cols-2">
+      </form>
+      <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <button id="startBtn" type="button" class="inline-flex items-center justify-center rounded-full coral-button px-8 py-4 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-105 active:scale-[0.98]">
+          <span class="animate-pulse" id="startBtnText">START SIMULATION</span>
+        </button>
+        <button id="resetBtn" type="button" class="inline-flex items-center justify-center rounded-full jungle-green px-8 py-4 text-base font-semibold text-white shadow-lg transition duration-200 hover:scale-105 active:scale-[0.98]">
+          <span id="resetBtnText">NEW SCENARIO</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="resultSection" class="mt-8 rounded-3xl glassmorphism tropical-shadow p-6">
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm uppercase tracking-[0.25em] text-slate-300" id="step3Label">STEP 3</p>
+          <h2 class="text-2xl font-semibold text-white" id="resultHeading">Strategic Prevention Plan</h2>
+        </div>
+      </div>
+      <div id="resultText" class="min-h-[180px] rounded-3xl glassmorphism p-6 text-slate-100">
+        <div class="flex h-full items-center justify-center gap-4">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-slate-400">
+            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9ZM19 9H14V4L19 9ZM12 11C13.66 11 15 12.34 15 14C15 15.66 13.66 17 12 17C10.34 17 9 15.66 9 14C9 12.34 10.34 11 12 11Z" fill="currentColor"/>
+          </svg>
+          <span class="text-slate-400">Simulation has not started</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let lang = 'en';
+
+    const uiText = {
+      zh: {
+        appSubTitle: 'Caribbean Climate Guard 仿真系统',
+        appTitle: 'Caribbean Climate Crisis Simulation',
+        appDescription: '构建一个沉浸式指挥中心界面，用于评估加勒比教育机构在气候冲击中的风险，并生成教学与应急响应方案。',
+        styleBadge: '紧急指挥中心风格',
+        step1Label: 'Step 1',
+        step1Title: '选择模拟深度',
+        step2Label: 'Step 2',
+        step2Title: '输入环境与教育变量',
+        step3Label: 'Step 3',
+        resultHeading: '战略预防方案',
+        basicCardMode: '基础韧性快检模式',
+        basicCardSubtitle: '基础韧性快检',
+        basicCardDesc: '快速评估教育机构的核心风险与应急建议。',
+        fullCardMode: '全维风险模拟决策模式',
+        fullCardSubtitle: '全维风险模拟',
+        fullCardDesc: '引入地形与季节变量，生成更完整的危机预警方案。',
+        startBtn: '开始模拟',
+        resetBtn: '开启新推演',
+        langToggle: 'EN',
+        modeLabelBasic: '当前模式：基础',
+        modeLabelFull: '当前模式：全维',
+        validation: '请填写所有变量以生成完整模拟方案。',
+        resultIdle: '模拟尚未开始',
+        resultLoading: '系统正在生成方案...',
+        examWeekValue: '国家考试周',
+        producerLabel: '制作者：沈皓天',
+        strongDigitalValues: ['全校光纤', '卫星网+离线服'],
+        enoughSupplyValues: ['72小时', '1周以上储备'],
+        resultPrefix: '【极端红色预警：校舍结构可能面临毁灭性破坏】\n',
+        assessmentIntro: '综合评估：当前机构处于',
+        preventionIntro: '预防性部署方案：首先对主要教学楼、宿舍楼与避难所进行物理加固，落实窗户封堵、屋顶固定与排水通道畅通。启动物资调度，将备用发电机、通信设备与医疗包置于核心指挥点。',
+        powerShortageNote: '若电力不足，需优先保障重要通信节点与数字备份。',
+        powerNormalNote: '已有备用电力，可加强负载分配与关键设备切换。',
+        seasonalNote: '根据季节窗口调整预警等级，飓风季与雨季高峰期间建议做两次追加巡检。',
+        continuityIntro: '教学连续性建议：应采用分区教学与远程备课相结合的模式。',
+        digitalHighNote: '高数字化韧性支持快速切换云端教学与在线资料同步。',
+        digitalLowNote: '数字化韧性有限，须准备纸质备份与手动广播传达方案。',
+        examWeekNote: '若处于国家考试周，方案必须包含关于CXC/CAPE考试卷宗的防水转移及考点临时延期的行政指令。',
+        normalContinuityNote: '可安排临时教学点与线上补课，避免学时断档。',
+        universityNote: '大学可开启线上讲座与实验室仿真课程。',
+        highSchoolNote: '高中需同步通知家长并安排考试重启方案。',
+        primaryNote: '小学与初中则应优先保障学生就近避险与心理安抚。',
+        estimatedRecoveryText: '预期恢复时间 (RTO)：',
+        actionPrefix: '在此基础上，关键行动项包括：\n',
+        extremeAlert: '【极端红色预警：校舍结构可能面临毁灭性破坏】\n',
+        highRiskLabel: '高',
+        veryHighRiskLabel: '极高',
+        mediumRiskLabel: '中等'
+      },
+      en: {
+        appSubTitle: 'Caribbean Climate Guard Simulation System',
+        appTitle: 'Caribbean Climate Crisis Simulation',
+        appDescription: 'Build an immersive command-center experience to assess climate risk for Caribbean educational institutions and generate teaching and emergency response plans.',
+        styleBadge: 'Emergency Command Center Aesthetic',
+        step1Label: 'STEP 1',
+        step1Title: 'Select Simulation Depth',
+        step2Label: 'STEP 2',
+        step2Title: 'Input Environmental & Educational Variables',
+        step3Label: 'STEP 3',
+        resultHeading: 'Strategic Prevention Plan',
+        basicCardMode: 'Basic Resilience Quick-Check Mode',
+        basicCardSubtitle: 'Quick Resilience Scan',
+        basicCardDesc: 'Quickly evaluate institutional risk and emergency response readiness.',
+        fullCardMode: 'Full-Dimensional Risk Simulation Mode',
+        fullCardSubtitle: 'Comprehensive Risk Decision',
+        fullCardDesc: 'Introduce terrain and seasonal variables for a comprehensive crisis forecast.',
+        startBtn: 'START SIMULATION',
+        resetBtn: 'NEW SCENARIO',
+        langToggle: '中文',
+        modeLabelBasic: 'Mode: Basic',
+        modeLabelFull: 'Mode: Full',
+        validation: 'Please fill in all variables to generate the complete simulation plan.',
+        resultIdle: 'Simulation has not started',
+        resultLoading: 'Generating Prevention Strategy...',
+        examWeekValue: 'National Exam Week',
+        strongDigitalValues: ['Campus Fiber', 'Satellite + Offline Servers'],
+        enoughSupplyValues: ['72 Hours', 'More Than 1 Week'],
+        resultPrefix: '[Extreme Red Alert: School structures may face catastrophic failure]\n',
+        assessmentIntro: 'Comprehensive assessment: the institution is currently in',
+        producerLabel: 'Producer：Shen Haotian',
+        preventionIntro: 'Preventive deployment plan: begin by reinforcing main academic buildings, dormitories, and shelters, sealing windows, securing roofs, and clearing drainage channels. Mobilize supplies by positioning backup generators, communications gear, and medical kits at the command hub.',
+        powerShortageNote: 'If power is limited, prioritize critical communications and digital backup systems.',
+        powerNormalNote: 'With backup power available, optimize load distribution and critical equipment switchover.',
+        seasonalNote: 'Adjust alert levels by seasonal window, with added inspections during hurricane season and rainy peaks.',
+        continuityIntro: 'Continuity recommendation: combine zoned instruction with remote lesson preparation.',
+        digitalHighNote: 'High digital resilience supports rapid cloud transition and online synchronization.',
+        digitalLowNote: 'Limited digital resilience requires paper backups and manual broadcast plans.',
+        examWeekNote: 'If this is exam week, include directives for waterproof transfer of CXC/CAPE exam materials and temporary exam site postponement.',
+        normalContinuityNote: 'Set up temporary teaching points and online catch-up to avoid learning interruption.',
+        universityNote: 'Universities can launch online lectures and lab simulation recovery sessions.',
+        highSchoolNote: 'High schools should notify families and schedule exam restart plans.',
+        primaryNote: 'Primary and middle schools should prioritize local sheltering and psychological support.',
+        estimatedRecoveryText: 'Estimated recovery time (RTO): ',
+        actionPrefix: 'Based on this, key actions include:\n',
+        extremeAlert: '[Extreme Red Alert: School structures may face catastrophic failure]\n',
+        highRiskLabel: 'High',
+        veryHighRiskLabel: 'Very High',
+        mediumRiskLabel: 'Moderate'
+      }
+    };
+
+    const basicFieldsZh = [
+      {
+        key: 'educationStage',
+        label: '教育阶段',
+        type: 'select',
+        options: ['小学', '初中', '高中', '大学'],
+        placeholder: '请选择教育阶段',
+        help: {
+          title: '教育阶段',
+          text: '当前机构所属的教育阶段会影响教学连续性与师生保护策略。',
+          legend: [
+            ['小学', '更需要就近避险与心理安抚'],
+            ['初中', '兼顾现场保护与远程课程衔接'],
+            ['高中', '考试安排与家长沟通为核心'],
+            ['大学', '侧重线上实验与数据保护']
+          ]
+        }
+      },
+      {
+        key: 'studentCount',
+        label: '在校人数',
+        type: 'number',
+        min: 20,
+        max: 5000,
+        unit: '人',
+        help: {
+          title: '在校人数',
+          text: '师生规模决定撤离、物资分配与安全区负载。'
+        }
+      },
+      {
+        key: 'academicTiming',
+        label: '教学时间戳',
+        type: 'select',
+        options: ['暑假', '常规学期', '学期起讫点', '期中周', '国家考试周'],
+        placeholder: '请选择时间窗口',
+        help: {
+          title: '教学时间戳',
+          text: '灾害发生时所属的教学周期，用于判断考试与教学连续性风险。',
+          legend: [
+            ['1', '暑假'],
+            ['2', '常规学期'],
+            ['3', '学期起讫点'],
+            ['4', '期中周'],
+            ['5', '国家考试周']
+          ]
+        }
+      },
+      {
+        key: 'hurricaneIntensity',
+        label: '飓风强度',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: '级',
+        help: {
+          title: '飓风强度',
+          text: '热带气旋对机构的冲击级别，影响物理防护与撤离策略。',
+          legend: [
+            ['1', '热带风暴'],
+            ['2', '二级飓风'],
+            ['3', '三级飓风'],
+            ['4', '四级飓风'],
+            ['5', '五级超级飓风']
+          ]
+        }
+      },
+      {
+        key: 'floodRisk',
+        label: '洪水风险',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: '级',
+        help: {
+          title: '洪水风险',
+          text: '暴雨与风暴潮导致校区积水或淹没的可能性。',
+          legend: [
+            ['1', '路面积水'],
+            ['2', '校园内涝'],
+            ['3', '首层进水'],
+            ['4', '深度淹没'],
+            ['5', '结构性损毁']
+          ]
+        }
+      },
+      {
+        key: 'buildingStrength',
+        label: '建筑坚固度',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: '级',
+        help: {
+          title: '建筑坚固度',
+          text: '校园建筑抵抗强风与结构性破坏的能力评级。',
+          legend: [
+            ['1', '临时木建'],
+            ['2', '老旧砖木'],
+            ['3', '标准砖混'],
+            ['4', '加固防灾建'],
+            ['5', '防御中心级']
+          ]
+        }
+      },
+      {
+        key: 'powerSupport',
+        label: '电力保障',
+        type: 'select',
+        options: ['常规供电', '备用发电机', '电力不足'],
+        placeholder: '请选择电力保障',
+        help: {
+          title: '电力保障',
+          text: '电力供应状态影响通讯、照明和远程教学的持续性。'
+        }
+      },
+      {
+        key: 'shelterQuality',
+        label: '避难所属性',
+        type: 'select',
+        options: ['校内避难所', '临时避难处', '缺乏避难空间'],
+        placeholder: '请选择避难所属性',
+        help: {
+          title: '避难所属性',
+          text: '用于安置师生的避难空间类型与安全性评估。'
+        }
+      },
+      {
+        key: 'supplyReserve',
+        label: '物资储备',
+        type: 'select',
+        options: ['无', '1天量', '48小时', '72小时', '1周以上储备'],
+        placeholder: '请选择物资储备',
+        help: {
+          title: '物资储备',
+          text: '应急物资可支持师生的持续时间。',
+          legend: [
+            ['1', '无'],
+            ['2', '1天量'],
+            ['3', '48小时'],
+            ['4', '72小时'],
+            ['5', '1周以上储备']
+          ]
+        }
+      },
+      {
+        key: 'evacuationEase',
+        label: '撤离便捷度',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: '级',
+        help: {
+          title: '撤离便捷度',
+          text: '师生转移到安全区的交通与通道效率。',
+          legend: [
+            ['1', '孤岛'],
+            ['2', '支路狭窄'],
+            ['3', '常规交通'],
+            ['4', '主干道旁'],
+            ['5', '专用撤离通道']
+          ]
+        }
+      }
+    ];
+
+    const basicFieldsEn = [
+      {
+        key: 'educationStage',
+        label: 'Education Stage',
+        type: 'select',
+        options: ['Primary', 'Middle School', 'High School', 'University'],
+        placeholder: 'Select education stage',
+        help: {
+          title: 'Education Stage',
+          text: 'The institution level influences continuity planning and protection needs.',
+          legend: [
+            ['Primary', 'Needs local sheltering and psychological support'],
+            ['Middle School', 'Balance on-site protection and remote lesson continuity'],
+            ['High School', 'Focus on exams and family communication'],
+            ['University', 'Emphasize online labs and data protection']
+          ]
+        }
+      },
+      {
+        key: 'studentCount',
+        label: 'Student Count',
+        type: 'number',
+        min: 20,
+        max: 5000,
+        unit: 'people',
+        help: {
+          title: 'Student Count',
+          text: 'Population size drives evacuation, supply allocation, and shelter capacity.'
+        }
+      },
+      {
+        key: 'academicTiming',
+        label: 'Academic Timing',
+        type: 'select',
+        options: ['Summer Break', 'Regular Term', 'Semester Boundary', 'Midterm Week', 'National Exam Week'],
+        placeholder: 'Select timing window',
+        help: {
+          title: 'Academic Timing',
+          text: 'When the event occurs in the academic calendar affects exam and continuity risk.',
+          legend: [
+            ['1', 'Summer Break'],
+            ['2', 'Regular Term'],
+            ['3', 'Semester Boundary'],
+            ['4', 'Midterm Week'],
+            ['5', 'National Exam Week']
+          ]
+        }
+      },
+      {
+        key: 'hurricaneIntensity',
+        label: 'Hurricane Intensity',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: 'level',
+        help: {
+          title: 'Hurricane Intensity',
+          text: 'Cyclone strength affecting physical protection and evacuation.',
+          legend: [
+            ['1', 'Tropical Storm'],
+            ['2', 'Category 2 Hurricane'],
+            ['3', 'Category 3 Hurricane'],
+            ['4', 'Category 4 Hurricane'],
+            ['5', 'Category 5 Superstorm']
+          ]
+        }
+      },
+      {
+        key: 'floodRisk',
+        label: 'Flood Risk',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: 'level',
+        help: {
+          title: 'Flood Risk',
+          text: 'Likelihood of campus flooding from rain or storm surge.',
+          legend: [
+            ['1', 'Surface water'],
+            ['2', 'Campus ponding'],
+            ['3', 'Ground floor intrusion'],
+            ['4', 'Deep inundation'],
+            ['5', 'Structural damage']
+          ]
+        }
+      },
+      {
+        key: 'buildingStrength',
+        label: 'Building Strength',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: 'level',
+        help: {
+          title: 'Building Strength',
+          text: 'Rating for wind resistance and structural durability.',
+          legend: [
+            ['1', 'Temporary wood'],
+            ['2', 'Old masonry'],
+            ['3', 'Standard concrete'],
+            ['4', 'Reinforced disaster-resistant'],
+            ['5', 'Defense-grade']
+          ]
+        }
+      },
+      {
+        key: 'powerSupport',
+        label: 'Power Support',
+        type: 'select',
+        options: ['Normal Power', 'Backup Generator', 'Power Shortage'],
+        placeholder: 'Select power status',
+        help: {
+          title: 'Power Support',
+          text: 'Power availability impacts communications, lighting, and remote learning.'
+        }
+      },
+      {
+        key: 'shelterQuality',
+        label: 'Shelter Quality',
+        type: 'select',
+        options: ['On-campus Shelter', 'Temporary Refuge', 'Insufficient Shelter'],
+        placeholder: 'Select shelter quality',
+        help: {
+          title: 'Shelter Quality',
+          text: 'Evaluates the safety and type of available shelter space.'
+        }
+      },
+      {
+        key: 'supplyReserve',
+        label: 'Supply Reserve',
+        type: 'select',
+        options: ['None', '1 Day', '48 Hours', '72 Hours', 'More Than 1 Week'],
+        placeholder: 'Select supply reserve',
+        help: {
+          title: 'Supply Reserve',
+          text: 'How long emergency supplies can support staff and students.',
+          legend: [
+            ['1', 'None'],
+            ['2', '1 Day'],
+            ['3', '48 Hours'],
+            ['4', '72 Hours'],
+            ['5', 'More Than 1 Week']
+          ]
+        }
+      },
+      {
+        key: 'evacuationEase',
+        label: 'Evacuation Ease',
+        type: 'range',
+        min: 1,
+        max: 5,
+        unit: 'level',
+        help: {
+          title: 'Evacuation Ease',
+          text: 'Efficiency of moving staff and students to safe zones.',
+          legend: [
+            ['1', 'Isolated'],
+            ['2', 'Narrow service roads'],
+            ['3', 'Regular traffic'],
+            ['4', 'Near main roads'],
+            ['5', 'Dedicated evacuation routes']
+          ]
+        }
+      }
+    ];
+
+    function getFields() {
+      if (lang === 'zh') {
+        return currentMode === 'basic' ? basicFieldsZh : [...basicFieldsZh, ...fullFieldsZh];
+      }
+      return currentMode === 'basic' ? basicFieldsEn : [...basicFieldsEn, ...fullFieldsEn];
+    }
+
+    const valueTranslationMap = {
+      educationStage: {
+        zh: ['小学', '初中', '高中', '大学'],
+        en: ['Primary', 'Middle School', 'High School', 'University']
+      },
+      academicTiming: {
+        zh: ['暑假', '常规学期', '学期起讫点', '期中周', '国家考试周'],
+        en: ['Summer Break', 'Regular Term', 'Semester Boundary', 'Midterm Week', 'National Exam Week']
+      },
+      powerSupport: {
+        zh: ['常规供电', '备用发电机', '电力不足'],
+        en: ['Normal Power', 'Backup Generator', 'Power Shortage']
+      },
+      shelterQuality: {
+        zh: ['校内避难所', '临时避难处', '缺乏避难空间'],
+        en: ['On-campus Shelter', 'Temporary Refuge', 'Insufficient Shelter']
+      },
+      supplyReserve: {
+        zh: ['无', '1天量', '48小时', '72小时', '1周以上储备'],
+        en: ['None', '1 Day', '48 Hours', '72 Hours', 'More Than 1 Week']
+      },
+      terrainSlope: {
+        zh: ['极陡坡', '陡峭', '起伏', '缓坡', '平坦开阔地'],
+        en: ['Very Steep', 'Steep', 'Undulating', 'Gentle Slope', 'Flat Open Land']
+      },
+      roofReinforcement: {
+        zh: ['铁皮瓦', '常规钉装', '防风索加固', '锚栓加固', '现浇钢混'],
+        en: ['Corrugated Iron', 'Standard Fastening', 'Wind-Strap Reinforced', 'Anchor Bolt Reinforced', 'Cast-in-Place Steel-Concrete']
+      },
+      digitalProtection: {
+        zh: ['无网络', '低带宽', '基本覆盖', '全校光纤', '卫星网+离线服'],
+        en: ['No Network', 'Low Bandwidth', 'Basic Coverage', 'Campus Fiber', 'Satellite + Offline Servers']
+      },
+      seasonalWindow: {
+        zh: ['雨季高峰', '飓风季', '相对平稳'],
+        en: ['Rainy Peak', 'Hurricane Season', 'Relatively Stable']
+      },
+      drainageEfficiency: {
+        zh: ['无系统', '易堵塞', '常规市政', '高效强排', '智能泵站'],
+        en: ['No System', 'Prone to Blockage', 'Standard Municipal', 'High-Efficiency Pump', 'Smart Pump Station']
+      },
+      islandCooperation: {
+        zh: ['完全孤立', '仅本地', '跨市互助', '跨岛协议', '国际绿色通道'],
+        en: ['Completely Isolated', 'Local Only', 'Cross-city Support', 'Inter-island Agreement', 'International Green Channel']
+      }
+    };
+
+    function translateStateValues(targetLang) {
+      const sourceLang = targetLang === 'zh' ? 'en' : 'zh';
+      Object.keys(valueTranslationMap).forEach(field => {
+        const value = state[field];
+        if (typeof value !== 'string') return;
+        const sourceArray = valueTranslationMap[field][sourceLang];
+        const targetArray = valueTranslationMap[field][targetLang];
+        const index = sourceArray.indexOf(value);
+        if (index >= 0) {
+          state[field] = targetArray[index];
+        }
+      });
+    }
+
+    function getText(key) {
+      return uiText[lang][key];
+    }
+
+    function updateStaticTexts() {
+      document.getElementById('appSubTitle').textContent = getText('appSubTitle');
+      document.getElementById('appTitle').textContent = getText('appTitle');
+      document.getElementById('appDescription').textContent = getText('appDescription');
+      document.getElementById('styleBadge').textContent = getText('styleBadge');
+      document.getElementById('step1Label').textContent = getText('step1Label');
+      document.getElementById('step1Title').textContent = getText('step1Title');
+      document.getElementById('step2Label').textContent = getText('step2Label');
+      document.getElementById('step2Title').textContent = getText('step2Title');
+      document.getElementById('step3Label').textContent = getText('step3Label');
+      document.getElementById('resultHeading').textContent = getText('resultHeading');
+      document.getElementById('basicCardMode').textContent = getText('basicCardMode');
+      document.getElementById('basicCardSubtitle').textContent = getText('basicCardSubtitle');
+      document.getElementById('basicCardDesc').textContent = getText('basicCardDesc');
+      document.getElementById('fullCardMode').textContent = getText('fullCardMode');
+      document.getElementById('fullCardSubtitle').textContent = getText('fullCardSubtitle');
+      document.getElementById('fullCardDesc').textContent = getText('fullCardDesc');
+      document.getElementById('startBtnText').textContent = getText('startBtn');
+      document.getElementById('resetBtn').textContent = getText('resetBtn');
+      document.getElementById('langToggleBtn').textContent = getText('langToggle');
+      document.getElementById('producerLabel').textContent = getText('producerLabel');
+      const modeLabel = document.getElementById('modeLabel');
+      modeLabel.textContent = currentMode === 'basic' ? getText('modeLabelBasic') : getText('modeLabelFull');
+    }
+
+    function toggleLanguage() {
+      const targetLang = lang === 'zh' ? 'en' : 'zh';
+      translateStateValues(targetLang);
+      lang = targetLang;
+      renderForm();
+      updateStaticTexts();
+      if (resultState === 'finished') {
+        resultContent = generatePlan();
+      }
+      updateResultDisplay();
+    }
+
+    function getRiskScore() {
+      const score = Number(state.hurricaneIntensity) + Number(state.floodRisk) + (6 - Number(state.buildingStrength)) + (6 - Number(state.evacuationEase));
+      if (currentMode === 'full') {
+        const altitudeScore = state.altitude <= 0 ? 3 : state.altitude <= 5 ? 2 : state.altitude <= 15 ? 1 : 0;
+        const distanceScore = state.offshoreDistance <= 20 ? 3 : state.offshoreDistance <= 80 ? 1 : 0;
+        const slopeScore = state.terrainSlope === (lang === 'zh' ? '极陡坡' : 'Very Steep') ? 3 : state.terrainSlope === (lang === 'zh' ? '陡峭' : 'Steep') ? 2 : state.terrainSlope === (lang === 'zh' ? '起伏' : 'Undulating') ? 1 : 0;
+        const roofScore = state.roofReinforcement === (lang === 'zh' ? '铁皮瓦' : 'Corrugated Iron') ? 3 : state.roofReinforcement === (lang === 'zh' ? '常规钉装' : 'Standard Fastening') ? 2 : state.roofReinforcement === (lang === 'zh' ? '防风索加固' : 'Wind-Strap Reinforced') ? 1 : 0;
+        const digitalScore = state.digitalProtection === (lang === 'zh' ? '无网络' : 'No Network') ? 3 : state.digitalProtection === (lang === 'zh' ? '低带宽' : 'Low Bandwidth') ? 2 : state.digitalProtection === (lang === 'zh' ? '基本覆盖' : 'Basic Coverage') ? 1 : 0;
+        const seasonScore = state.seasonalWindow === (lang === 'zh' ? '飓风季' : 'Hurricane Season') ? 2 : state.seasonalWindow === (lang === 'zh' ? '雨季高峰' : 'Rainy Peak') ? 1 : 0;
+        const drainScore = state.drainageEfficiency === (lang === 'zh' ? '无系统' : 'No System') ? 3 : state.drainageEfficiency === (lang === 'zh' ? '易堵塞' : 'Prone to Blockage') ? 2 : state.drainageEfficiency === (lang === 'zh' ? '常规市政' : 'Standard Municipal') ? 1 : 0;
+        const coopScore = state.islandCooperation === (lang === 'zh' ? '完全孤立' : 'Completely Isolated') ? 3 : state.islandCooperation === (lang === 'zh' ? '仅本地' : 'Local Only') ? 2 : state.islandCooperation === (lang === 'zh' ? '跨市互助' : 'Cross-city Support') ? 1 : 0;
+        return score + altitudeScore + distanceScore + slopeScore + roofScore + digitalScore + seasonScore + drainScore + coopScore;
+      }
+      return score;
+    }
+
+    const fullFieldsZh = [
+      {
+        key: 'altitude',
+        label: '海拔高度',
+        type: 'number',
+        min: 0,
+        max: 2000,
+        unit: 'm',
+        help: {
+          title: '海拔高度',
+          text: '学校相对海平面的垂直位置，影响风暴潮与洪水暴露。',
+          legend: [
+            ['1', '≤0m'],
+            ['2', '1-5m'],
+            ['3', '5-15m'],
+            ['4', '15-50m'],
+            ['5', '高海拔区']
+          ]
+        }
+      },
+      {
+        key: 'offshoreDistance',
+        label: '离岸距离',
+        type: 'number',
+        min: 0,
+        max: 200,
+        unit: 'km',
+        help: {
+          title: '离岸距离',
+          text: '学校距离海岸的距离决定风暴潮与沿海飓风影响强度。'
+        }
+      },
+      {
+        key: 'terrainSlope',
+        label: '地形坡度',
+        type: 'select',
+        options: ['极陡坡', '陡峭', '起伏', '缓坡', '平坦开阔地'],
+        placeholder: '请选择坡度',
+        help: {
+          title: '地形坡度',
+          text: '周边地形倾斜程度会影响滑坡与径流风险。',
+          legend: [
+            ['1', '极陡坡'],
+            ['2', '陡峭'],
+            ['3', '起伏'],
+            ['4', '缓坡'],
+            ['5', '平坦开阔地']
+          ]
+        }
+      },
+      {
+        key: 'roofReinforcement',
+        label: '屋顶加固',
+        type: 'select',
+        options: ['铁皮瓦', '常规钉装', '防风索加固', '锚栓加固', '现浇钢混'],
+        placeholder: '请选择屋顶状态',
+        help: {
+          title: '屋顶加固',
+          text: '屋顶结构对飓风过程中的生存能力至关重要。'
+        }
+      },
+      {
+        key: 'digitalProtection',
+        label: '数字化韧性',
+        type: 'select',
+        options: ['无网络', '低带宽', '基本覆盖', '全校光纤', '卫星网+离线服'],
+        placeholder: '请选择数字化韧性',
+        help: {
+          title: '数字化韧性',
+          text: '线上教学与数据保护在灾害中的支撑力度。',
+          legend: [
+            ['1', '无网络'],
+            ['2', '低带宽'],
+            ['3', '基本覆盖'],
+            ['4', '全校光纤'],
+            ['5', '卫星网+离线服']
+          ]
+        }
+      },
+      {
+        key: 'seasonalWindow',
+        label: '季节性窗口',
+        type: 'select',
+        options: ['雨季高峰', '飓风季', '相对平稳'],
+        placeholder: '请选择季节窗口',
+        help: {
+          title: '季节性窗口',
+          text: '当前季节周期决定飓风和暴雨风险的峰值。'
+        }
+      },
+      {
+        key: 'drainageEfficiency',
+        label: '排水效率',
+        type: 'select',
+        options: ['无系统', '易堵塞', '常规市政', '高效强排', '智能泵站'],
+        placeholder: '请选择排水效率',
+        help: {
+          title: '排水效率',
+          text: '暴雨后积水排除速度决定校园淹没风险。',
+          legend: [
+            ['1', '无系统'],
+            ['2', '易堵塞'],
+            ['3', '常规市政'],
+            ['4', '高效强排'],
+            ['5', '智能泵站']
+          ]
+        }
+      },
+      {
+        key: 'islandCooperation',
+        label: '跨岛协作',
+        type: 'select',
+        options: ['完全孤立', '仅本地', '跨市互助', '跨岛协议', '国际绿色通道'],
+        placeholder: '请选择跨岛协作',
+        help: {
+          title: '跨岛协作',
+          text: '获取外部援助与支援通道的响应速度。',
+          legend: [
+            ['1', '完全孤立'],
+            ['2', '仅本地'],
+            ['3', '跨市互助'],
+            ['4', '跨岛协议'],
+            ['5', '国际绿色通道']
+          ]
+        }
+      }
+    ];
+
+    const fullFieldsEn = [
+      {
+        key: 'altitude',
+        label: 'Altitude',
+        type: 'number',
+        min: 0,
+        max: 2000,
+        unit: 'm',
+        help: {
+          title: 'Altitude',
+          text: 'Vertical position above sea level influences storm surge and flood exposure.',
+          legend: [
+            ['1', '≤0m'],
+            ['2', '1-5m'],
+            ['3', '5-15m'],
+            ['4', '15-50m'],
+            ['5', 'High elevation']
+          ]
+        }
+      },
+      {
+        key: 'offshoreDistance',
+        label: 'Offshore Distance',
+        type: 'number',
+        min: 0,
+        max: 200,
+        unit: 'km',
+        help: {
+          title: 'Offshore Distance',
+          text: 'Distance from the coast determines storm surge intensity.'
+        }
+      },
+      {
+        key: 'terrainSlope',
+        label: 'Terrain Slope',
+        type: 'select',
+        options: ['Very Steep', 'Steep', 'Undulating', 'Gentle Slope', 'Flat Open Land'],
+        placeholder: 'Select slope',
+        help: {
+          title: 'Terrain Slope',
+          text: 'Land slope affects landslide and runoff risk.',
+          legend: [
+            ['1', 'Very Steep'],
+            ['2', 'Steep'],
+            ['3', 'Undulating'],
+            ['4', 'Gentle Slope'],
+            ['5', 'Flat Open Land']
+          ]
+        }
+      },
+      {
+        key: 'roofReinforcement',
+        label: 'Roof Reinforcement',
+        type: 'select',
+        options: ['Corrugated Iron', 'Standard Fastening', 'Wind-Strap Reinforced', 'Anchor Bolt Reinforced', 'Cast-in-Place Steel-Concrete'],
+        placeholder: 'Select roof status',
+        help: {
+          title: 'Roof Reinforcement',
+          text: 'Roof structure is critical for survival during hurricanes.'
+        }
+      },
+      {
+        key: 'digitalProtection',
+        label: 'Digital Resilience',
+        type: 'select',
+        options: ['No Network', 'Low Bandwidth', 'Basic Coverage', 'Campus Fiber', 'Satellite + Offline Servers'],
+        placeholder: 'Select digital resilience',
+        help: {
+          title: 'Digital Resilience',
+          text: 'Online teaching and data protection support during disaster.',
+          legend: [
+            ['1', 'No Network'],
+            ['2', 'Low Bandwidth'],
+            ['3', 'Basic Coverage'],
+            ['4', 'Campus Fiber'],
+            ['5', 'Satellite + Offline Servers']
+          ]
+        }
+      },
+      {
+        key: 'seasonalWindow',
+        label: 'Seasonal Window',
+        type: 'select',
+        options: ['Rainy Peak', 'Hurricane Season', 'Relatively Stable'],
+        placeholder: 'Select seasonal window',
+        help: {
+          title: 'Seasonal Window',
+          text: 'The current season determines hurricane and storm peak risk.'
+        }
+      },
+      {
+        key: 'drainageEfficiency',
+        label: 'Drainage Efficiency',
+        type: 'select',
+        options: ['No System', 'Prone to Blockage', 'Standard Municipal', 'High-Efficiency Pump', 'Smart Pump Station'],
+        placeholder: 'Select drainage efficiency',
+        help: {
+          title: 'Drainage Efficiency',
+          text: 'Stormwater removal speed determines flood persistence risk.',
+          legend: [
+            ['1', 'No System'],
+            ['2', 'Prone to Blockage'],
+            ['3', 'Standard Municipal'],
+            ['4', 'High-Efficiency Pump'],
+            ['5', 'Smart Pump Station']
+          ]
+        }
+      },
+      {
+        key: 'islandCooperation',
+        label: 'Island Cooperation',
+        type: 'select',
+        options: ['Completely Isolated', 'Local Only', 'Cross-city Support', 'Inter-island Agreement', 'International Green Channel'],
+        placeholder: 'Select island cooperation',
+        help: {
+          title: 'Island Cooperation',
+          text: 'Response speed for external support and assistance corridors.',
+          legend: [
+            ['1', 'Completely Isolated'],
+            ['2', 'Local Only'],
+            ['3', 'Cross-city Support'],
+            ['4', 'Inter-island Agreement'],
+            ['5', 'International Green Channel']
+          ]
+        }
+      }
+    ];
+
+    let currentMode = 'basic';
+    const formSection = document.getElementById('formSection');
+    const resultSection = document.getElementById('resultSection');
+    const simulationForm = document.getElementById('simulationForm');
+    const modeLabel = document.getElementById('modeLabel');
+    const resultText = document.getElementById('resultText');
+    const basicModeBtn = document.getElementById('basicModeBtn');
+    const fullModeBtn = document.getElementById('fullModeBtn');
+    const startBtn = document.getElementById('startBtn');
+    console.log('startBtn found:', startBtn);
+    if (!startBtn) {
+      alert('startBtn not found!');
+    }
+    const resetBtn = document.getElementById('resetBtn');
+    const langToggleBtn = document.getElementById('langToggleBtn');
+
+    const state = {};
+    let resultState = 'idle';
+    let resultContent = '';
+
+    function setResultState(newState, content) {
+      resultState = newState;
+      if (content !== undefined) {
+        resultContent = content;
+      }
+      if (newState === 'idle') {
+        resultContent = '';
+      }
+      updateResultDisplay();
+    }
+
+    function updateResultDisplay() {
+      const textBox = document.getElementById('resultText');
+      if (!textBox) return;
+      const t = uiText[lang];
+      if (resultState === 'idle') {
+        textBox.innerHTML = `<div class="flex h-full items-center justify-center text-slate-500">${t.resultIdle}</div>`;
+        return;
+      }
+      if (resultState === 'loading') {
+        textBox.innerHTML = `<div class="flex flex-col items-center gap-3 text-white"><span class="h-4 w-4 animate-pulse rounded-full bg-orange-400"></span><span>${t.resultLoading}</span></div>`;
+        return;
+      }
+      if (resultState === 'finished') {
+        textBox.textContent = resultContent;
+      }
+    }
+
+    const fieldIconMap = {
+      educationStage: '�',
+      studentCount: '👨‍🎓👩‍🎓',
+      academicTiming: '📚',
+      hurricaneIntensity: '🌀',
+      floodRisk: '🌊',
+      buildingStrength: '🏗️',
+      powerSupport: '🔌',
+      shelterQuality: '⛺',
+      supplyReserve: '🥫',
+      evacuationEase: '🚶‍♂️',
+      altitude: '🏔️',
+      offshoreDistance: '🏖️',
+      terrainSlope: '🏞️',
+      roofReinforcement: '🔨',
+      digitalProtection: '💻',
+      seasonalWindow: '🌤️',
+      drainageEfficiency: '🚿',
+      islandCooperation: '🤝'
+    };
+
+    function renderForm() {
+      simulationForm.innerHTML = '';
+      const fields = getFields();
+      fields.forEach(field => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative overflow-visible min-h-[165px] space-y-3 rounded-3xl glassmorphism tropical-shadow p-5 sm:p-6';
+
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-3 text-sm font-medium text-white';
+        label.htmlFor = field.key;
+        const icon = document.createElement('span');
+        icon.textContent = fieldIconMap[field.key] || 'ℹ️';
+        icon.className = 'inline-flex h-8 w-8 items-center justify-center rounded-2xl tropical-icon text-lg';
+        const labelText = document.createElement('span');
+        labelText.textContent = field.label;
+        label.appendChild(icon);
+        label.appendChild(labelText);
+        wrapper.appendChild(label);
+
+        let inputElement;
+
+        if (field.type === 'select') {
+          inputElement = document.createElement('select');
+          inputElement.id = field.key;
+          inputElement.name = field.key;
+          inputElement.className = 'w-full rounded-2xl glassmorphism px-4 py-3 text-white outline-none transition focus:ring-2 focus:ring-orange-400 appearance-none';
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = field.placeholder || '请选择';
+          placeholder.disabled = true;
+          placeholder.selected = !state[field.key];
+          inputElement.appendChild(placeholder);
+          field.options.forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option;
+            opt.textContent = option;
+            inputElement.appendChild(opt);
+          });
+          if (state[field.key]) {
+            inputElement.value = state[field.key];
+          }
+          inputElement.addEventListener('change', updateState);
+        } else if (field.type === 'range') {
+          const rangeBox = document.createElement('div');
+          rangeBox.className = 'flex items-center gap-3';
+          const input = document.createElement('input');
+          input.id = field.key;
+          input.name = field.key;
+          input.type = 'range';
+          input.min = field.min;
+          input.max = field.max;
+          input.value = state[field.key] !== undefined ? state[field.key] : field.min;
+          input.className = 'w-full accent-orange-400';
+          const valueLabel = document.createElement('span');
+          valueLabel.className = 'w-16 text-right text-sm text-white';
+          valueLabel.textContent = `${input.value}${field.unit || ''}`;
+          input.addEventListener('input', () => {
+            valueLabel.textContent = `${input.value}${field.unit || ''}`;
+            updateState();
+          });
+          rangeBox.appendChild(input);
+          rangeBox.appendChild(valueLabel);
+          wrapper.appendChild(rangeBox);
+          state[field.key] = Number(input.value);
+          inputElement = null;
+        } else {
+          inputElement = document.createElement('input');
+          inputElement.id = field.key;
+          inputElement.name = field.key;
+          inputElement.type = field.type;
+          inputElement.min = field.min || 0;
+          inputElement.max = field.max || 9999;
+          inputElement.className = 'w-full rounded-2xl glassmorphism px-4 py-3 text-white outline-none transition focus:ring-2 focus:ring-orange-400 placeholder-slate-400';
+          inputElement.placeholder = field.unit ? (lang === 'zh' ? `单位 ${field.unit}` : `Unit ${field.unit}`) : '';
+          if (state[field.key] !== undefined) {
+            inputElement.value = state[field.key];
+          }
+          inputElement.addEventListener('input', updateState);
+        }
+
+        if (inputElement) {
+          wrapper.appendChild(inputElement);
+        }
+
+        if (field.unit && field.type !== 'range') {
+          const unitText = document.createElement('p');
+          unitText.className = 'text-xs text-slate-300';
+          unitText.textContent = lang === 'zh' ? `单位：${field.unit}` : `Unit: ${field.unit}`;
+          wrapper.appendChild(unitText);
+        }
+
+        if (field.help) {
+          const helpButton = document.createElement('button');
+          helpButton.type = 'button';
+          helpButton.className = 'absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-full glassmorphism text-white text-sm font-bold transition hover:bg-white/20 z-40';
+          helpButton.innerHTML = '?';
+
+          const tooltip = document.createElement('div');
+          tooltip.className = 'absolute top-full right-0 z-50 mt-2 hidden w-80 rounded-2xl border border-slate-700/80 bg-slate-950/95 backdrop-blur-sm p-4 text-sm text-white shadow-2xl shadow-slate-950/40';
+          tooltip.innerHTML = `<p class="font-semibold text-slate-100">${field.help.title}</p><p class="mt-2 text-slate-300">${field.help.text}</p>`;
+          if (field.help.legend) {
+            const legendHtml = field.help.legend.map(item => `<div class="mt-2"><span class="font-medium text-slate-100">${item[0]}：</span><span class="text-slate-300">${item[1]}</span></div>`).join('');
+            tooltip.innerHTML += `<div class="mt-3 border-t border-slate-700 pt-3 text-slate-300">${legendHtml}</div>`;
+          }
+          helpButton.appendChild(tooltip);
+          helpButton.addEventListener('mouseenter', () => {
+            tooltip.classList.remove('hidden');
+            wrapper.style.zIndex = '50';
+          });
+          helpButton.addEventListener('mouseleave', () => {
+            tooltip.classList.add('hidden');
+            wrapper.style.zIndex = '';
+          });
+          tooltip.addEventListener('mouseenter', () => {
+            tooltip.classList.remove('hidden');
+            wrapper.style.zIndex = '50';
+          });
+          tooltip.addEventListener('mouseleave', () => {
+            tooltip.classList.add('hidden');
+            wrapper.style.zIndex = '';
+          });
+          wrapper.appendChild(helpButton);
+        }
+
+        simulationForm.appendChild(wrapper);
+      });
+      formSection.classList.remove('hidden');
+      const modeLabelText = currentMode === 'basic' ? getText('modeLabelBasic') : getText('modeLabelFull');
+      modeLabel.textContent = modeLabelText;
+      highlightModeButtons();
+    }
+
+    function highlightModeButtons() {
+      basicModeBtn.classList.toggle('ring-2', currentMode === 'basic');
+      basicModeBtn.classList.toggle('ring-orange-400', currentMode === 'basic');
+      fullModeBtn.classList.toggle('ring-2', currentMode === 'full');
+      fullModeBtn.classList.toggle('ring-yellow-400', currentMode === 'full');
+    }
+
+    function updateState() {
+      const fields = getFields();
+      fields.forEach(field => {
+        const element = document.getElementById(field.key);
+        if (!element) return;
+        state[field.key] = element.type === 'range' || element.type === 'number' ? Number(element.value) : element.value;
+      });
+    }
+
+    function validateInputs() {
+      const required = getFields();
+      for (const field of required) {
+        const value = state[field.key];
+        if (value === undefined || value === '' || (typeof value === 'number' && Number.isNaN(value))) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function getRiskScore() {
+      const score = Number(state.hurricaneIntensity) + Number(state.floodRisk) + (6 - Number(state.buildingStrength)) + (6 - Number(state.evacuationEase));
+      if (currentMode === 'full') {
+        const altitudeScore = state.altitude <= 0 ? 3 : state.altitude <= 5 ? 2 : state.altitude <= 15 ? 1 : 0;
+        const distanceScore = state.offshoreDistance <= 20 ? 3 : state.offshoreDistance <= 80 ? 1 : 0;
+        const fields = getFields();
+        const slopeField = fields.find(f => f.key === 'terrainSlope');
+        const slopeIndex = slopeField ? slopeField.options.indexOf(state.terrainSlope) : -1;
+        const slopeScore = slopeIndex >= 0 ? 3 - slopeIndex : 0;
+        const roofField = fields.find(f => f.key === 'roofReinforcement');
+        const roofIndex = roofField ? roofField.options.indexOf(state.roofReinforcement) : -1;
+        const roofScore = roofIndex >= 0 ? 3 - roofIndex : 0;
+        const digitalField = fields.find(f => f.key === 'digitalProtection');
+        const digitalIndex = digitalField ? digitalField.options.indexOf(state.digitalProtection) : -1;
+        const digitalScore = digitalIndex >= 0 ? 3 - digitalIndex : 0;
+        const seasonField = fields.find(f => f.key === 'seasonalWindow');
+        const seasonIndex = seasonField ? seasonField.options.indexOf(state.seasonalWindow) : -1;
+        const seasonScore = seasonIndex === 0 ? 2 : seasonIndex === 1 ? 1 : 0;
+        const drainField = fields.find(f => f.key === 'drainageEfficiency');
+        const drainIndex = drainField ? drainField.options.indexOf(state.drainageEfficiency) : -1;
+        const drainScore = drainIndex >= 0 ? 3 - drainIndex : 0;
+        const coopField = fields.find(f => f.key === 'islandCooperation');
+        const coopIndex = coopField ? coopField.options.indexOf(state.islandCooperation) : -1;
+        const coopScore = coopIndex >= 0 ? 3 - coopIndex : 0;
+        return score + altitudeScore + distanceScore + slopeScore + roofScore + digitalScore + seasonScore + drainScore + coopScore;
+      }
+      return score;
+    }
+
+    function generatePlan() {
+      const t = uiText[lang];
+      const riskScore = getRiskScore();
+      const examWeek = state.academicTiming === t.examWeekValue;
+      const strongHurricane = Number(state.hurricaneIntensity) >= 4;
+      const timeWindow = state.academicTiming;
+      const stage = state.educationStage;
+      let recoveryDays = 7;
+      if (Number(state.buildingStrength) < 3) recoveryDays += 10;
+      if (t.enoughSupplyValues.includes(state.supplyReserve)) recoveryDays -= 3;
+      recoveryDays = Math.min(28, Math.max(7, recoveryDays));
+      const recoveryText = `${recoveryDays} ${lang === 'zh' ? '天' : 'days'}`;
+      const actions = [];
+
+      if ((strongHurricane || Number(state.floodRisk) >= 4) && Number(state.buildingStrength) <= 2) {
+        actions.push(lang === 'zh' ? '立即启动极端红色预警，组织校舍与安全区结构加固。' : 'Immediately activate an extreme red alert and reinforce school structures and safe zones.');
+      }
+      actions.push(lang === 'zh' ? '成立应急指挥小组，明确现场与远程协同责任。' : 'Establish an emergency command team with clear on-site and remote coordination roles.');
+      actions.push(lang === 'zh' ? '检视校内避难所与物资储备，并启动最短路径撤离方案。' : 'Inspect on-campus shelters and supplies, then activate the most efficient evacuation routes.');
+      if (state.powerSupport === (lang === 'zh' ? '电力不足' : 'Power Shortage')) {
+        actions.push(lang === 'zh' ? '调配备用发电机并优先保障关键教学与通讯设施。' : 'Deploy backup generators and prioritize power for critical teaching and communications systems.');
+      }
+      const highDigital = t.strongDigitalValues.includes(state.digitalProtection);
+      if (!highDigital) {
+        actions.push(lang === 'zh' ? '准备离线备份与纸质试卷，以防网络中断。' : 'Prepare offline backups and paper exam packets in case the network fails.');
+      }
+      if (examWeek) {
+        actions.push(lang === 'zh' ? '制定考试调整方案，准备备用试卷与临时延期指令。' : 'Develop exam adjustment plans and prepare backup materials and temporary postponement orders.');
+      }
+      if (strongHurricane) {
+        actions.push(lang === 'zh' ? '加强屋顶与窗门加固，重点保护试卷、服务器与医疗保障物资。' : 'Strengthen roof and window reinforcements, protecting exam papers, servers, and medical supplies.');
+      }
+      if (state.supplyReserve === (lang === 'zh' ? '无' : 'None')) {
+        actions.push(lang === 'zh' ? '紧急补充饮用水、食品、药品等基础救援物资。' : 'Urgently replenish essential water, food, and medical supplies.');
+      }
+      if (currentMode === 'full') {
+        actions.push(lang === 'zh' ? '结合地形与离岸距离，优先布设临时防洪墙与坡面排水。' : 'Coordinate terrain and offshore distance to set up temporary flood defenses and slope drainage.');
+      }
+
+      const riskLabel = riskScore > 18 ? t.veryHighRiskLabel : riskScore > 12 ? t.highRiskLabel : t.mediumRiskLabel;
+      const assessment = `${t.assessmentIntro} ${timeWindow}${lang === 'zh' ? '，' : ', '} ${lang === 'zh' ? `${stage}的教育环境面临较高危机暴露。` : `${stage} educational environment is under elevated exposure.`}` +
+        `${lang === 'zh' ? `飓风强度 ${state.hurricaneIntensity} 级、洪水风险 ${state.floodRisk} 级，建筑坚固度为 ${state.buildingStrength} 级，${state.evacuationEase} 级撤离便捷度决定了现场响应时效性。` : `Hurricane intensity is ${state.hurricaneIntensity}, flood risk is ${state.floodRisk}, building strength is ${state.buildingStrength}, and evacuation ease is ${state.evacuationEase}.`}` +
+        `${currentMode === 'full' ? (lang === 'zh' ? `额外考虑海拔 ${state.altitude} m、离岸距离 ${state.offshoreDistance} km 以及 ${state.terrainSlope} 地形，` : `Additionally considering altitude ${state.altitude} m, offshore distance ${state.offshoreDistance} km, and ${state.terrainSlope} terrain, `) : ''}` +
+        `${lang === 'zh' ? `当前整体风险评估趋于 ${riskLabel}，需要立即部署防护与教学连续性保障措施。` : `Overall risk is assessed as ${riskLabel}, requiring immediate protection and continuity actions.`}`;
+
+      const prevention = `${t.preventionIntro} ${state.powerSupport === (lang === 'zh' ? '电力不足' : 'Power Shortage') ? t.powerShortageNote : t.powerNormalNote}${currentMode === 'full' ? ` ${t.seasonalNote}` : ''}`;
+
+      let continuity = `${t.continuityIntro} ${highDigital ? t.digitalHighNote : t.digitalLowNote} ${examWeek ? t.examWeekNote : t.normalContinuityNote}`;
+      if (lang === 'zh') {
+        continuity += stage === '大学' ? t.universityNote : stage === '高中' ? t.highSchoolNote : t.primaryNote;
+      } else {
+        continuity += stage === 'University' ? t.universityNote : stage === 'High School' ? t.highSchoolNote : t.primaryNote;
+      }
+
+      const plan = `${assessment}\n\n${prevention}\n\n${continuity}\n\n${t.estimatedRecoveryText}${recoveryText}.\n${t.actionPrefix}` +
+        actions.map(item => `- ${item}`).join('\n');
+
+      return plan;
+    }
+
+    function buildPlan() {
+      updateState();
+      if (!validateInputs()) {
+        alert(getText('validation'));
+        return;
+      }
+      setResultState('loading');
+      resultSection.classList.remove('hidden');
+      resultSection.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        const plan = generatePlan();
+        setResultState('finished', plan);
+        resultSection.classList.remove('hidden');
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+      }, 80);
+    }
+
+    function resetScenario() {
+      currentMode = 'basic';
+      Object.keys(state).forEach(key => delete state[key]);
+      setResultState('idle');
+      renderForm();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    basicModeBtn.addEventListener('click', () => {
+      if (currentMode === 'basic') return;
+      currentMode = 'basic';
+      Object.keys(state).forEach(key => delete state[key]);
+      setResultState('idle');
+      renderForm();
+    });
+
+    fullModeBtn.addEventListener('click', () => {
+      if (currentMode === 'full') return;
+      currentMode = 'full';
+      Object.keys(state).forEach(key => delete state[key]);
+      setResultState('idle');
+      renderForm();
+    });
+
+    startBtn.addEventListener('click', buildPlan);
+    resetBtn.addEventListener('click', resetScenario);
+    langToggleBtn.addEventListener('click', toggleLanguage);
+
+    renderForm();
+    updateStaticTexts();
+    setResultState('idle');
+  </script>
+</body>
+</html>
