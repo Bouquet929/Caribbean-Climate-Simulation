@@ -91,6 +91,38 @@
       border: 2px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
     }
+    .loading-text {
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    .loading-bar {
+      position: relative;
+      width: 180px;
+      height: 8px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .loading-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -40%;
+      width: 40%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 9999px;
+      animation: loadingSlide 1.4s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    @keyframes loadingSlide {
+      0% { left: -40%; }
+      50% { left: 60%; }
+      100% { left: 100%; }
+    }
     select {
       color: #0f172a;
       background-color: rgba(255, 255, 255, 0.9);
@@ -246,7 +278,7 @@
         modeLabelFull: '当前模式：全维',
         validation: '请填写所有变量以生成完整模拟方案。',
         resultIdle: '模拟尚未开始',
-        resultLoading: '系统正在生成方案...',
+        resultLoading: '正在连接加勒比推演中心...',
         examWeekValue: '国家考试周',
         producerLabel: '制作者：沈皓天',
         strongDigitalValues: ['全校光纤', '卫星网+离线服'],
@@ -296,7 +328,7 @@
         modeLabelFull: 'Mode: Full',
         validation: 'Please fill in all variables to generate the complete simulation plan.',
         resultIdle: 'Simulation has not started',
-        resultLoading: 'Generating Prevention Strategy...',
+        resultLoading: 'Connecting to Caribbean simulation center...',
         examWeekValue: 'National Exam Week',
         strongDigitalValues: ['Campus Fiber', 'Satellite + Offline Servers'],
         enoughSupplyValues: ['72 Hours', 'More Than 1 Week'],
@@ -759,9 +791,6 @@
       lang = targetLang;
       renderForm();
       updateStaticTexts();
-      if (resultState === 'finished') {
-        resultContent = generatePlan();
-      }
       updateResultDisplay();
     }
 
@@ -1057,6 +1086,10 @@
     let resultState = 'idle';
     let resultContent = '';
 
+    const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+    const OPENROUTER_API_KEY = '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';
+    const OPENROUTER_MODEL = 'google/gemini-2.0-flash-001';
+
     function setResultState(newState, content) {
       resultState = newState;
       if (content !== undefined) {
@@ -1077,7 +1110,12 @@
         return;
       }
       if (resultState === 'loading') {
-        textBox.innerHTML = `<div class="flex flex-col items-center gap-3 text-white"><span class="h-4 w-4 animate-pulse rounded-full bg-orange-400"></span><span>${t.resultLoading}</span></div>`;
+        textBox.innerHTML = `
+          <div class="flex flex-col items-center gap-4 text-white">
+            <span class="text-lg font-semibold loading-text">${t.resultLoading}</span>
+            <div class="loading-bar"></div>
+          </div>
+        `;
         return;
       }
       if (resultState === 'finished') {
@@ -1294,67 +1332,114 @@
       return score;
     }
 
-    function generatePlan() {
-      const t = uiText[lang];
-      const riskScore = getRiskScore();
-      const examWeek = state.academicTiming === t.examWeekValue;
-      const strongHurricane = Number(state.hurricaneIntensity) >= 4;
-      const timeWindow = state.academicTiming;
-      const stage = state.educationStage;
-      let recoveryDays = 7;
-      if (Number(state.buildingStrength) < 3) recoveryDays += 10;
-      if (t.enoughSupplyValues.includes(state.supplyReserve)) recoveryDays -= 3;
-      recoveryDays = Math.min(28, Math.max(7, recoveryDays));
-      const recoveryText = `${recoveryDays} ${lang === 'zh' ? '天' : 'days'}`;
-      const actions = [];
+    function buildOpenRouterPrompt() {
+      const promptLanguage = lang === 'zh' ? 'Chinese (Simplified)' : 'English';
+      const closingSentence = lang === 'zh' ? '请务必使用中文（简体）撰写此方案。' : 'Please ensure the plan is written in English.';
+      const labels = {
+        educationStage: lang === 'zh' ? '教育阶段' : 'Education Stage',
+        studentCount: lang === 'zh' ? '学生人数' : 'Student Count',
+        academicTiming: lang === 'zh' ? '学期时点' : 'Academic Timing',
+        hurricaneIntensity: lang === 'zh' ? '飓风强度' : 'Hurricane Intensity',
+        floodRisk: lang === 'zh' ? '洪水风险' : 'Flood Risk',
+        buildingStrength: lang === 'zh' ? '建筑强度' : 'Building Strength',
+        powerSupport: lang === 'zh' ? '电力保障' : 'Power Support',
+        shelterQuality: lang === 'zh' ? '避难所质量' : 'Shelter Quality',
+        supplyReserve: lang === 'zh' ? '物资储备' : 'Supply Reserve',
+        evacuationEase: lang === 'zh' ? '疏散便利性' : 'Evacuation Ease',
+        altitude: lang === 'zh' ? '海拔高度' : 'Altitude',
+        offshoreDistance: lang === 'zh' ? '离岸距离' : 'Offshore Distance',
+        terrainSlope: lang === 'zh' ? '地形坡度' : 'Terrain Slope',
+        roofReinforcement: lang === 'zh' ? '屋顶加固' : 'Roof Reinforcement',
+        digitalProtection: lang === 'zh' ? '数字防护' : 'Digital Protection',
+        seasonalWindow: lang === 'zh' ? '季节窗口' : 'Seasonal Window',
+        drainageEfficiency: lang === 'zh' ? '排水效率' : 'Drainage Efficiency',
+        islandCooperation: lang === 'zh' ? '岛屿协作' : 'Island Cooperation'
+      };
 
-      if ((strongHurricane || Number(state.floodRisk) >= 4) && Number(state.buildingStrength) <= 2) {
-        actions.push(lang === 'zh' ? '立即启动极端红色预警，组织校舍与安全区结构加固。' : 'Immediately activate an extreme red alert and reinforce school structures and safe zones.');
-      }
-      actions.push(lang === 'zh' ? '成立应急指挥小组，明确现场与远程协同责任。' : 'Establish an emergency command team with clear on-site and remote coordination roles.');
-      actions.push(lang === 'zh' ? '检视校内避难所与物资储备，并启动最短路径撤离方案。' : 'Inspect on-campus shelters and supplies, then activate the most efficient evacuation routes.');
-      if (state.powerSupport === (lang === 'zh' ? '电力不足' : 'Power Shortage')) {
-        actions.push(lang === 'zh' ? '调配备用发电机并优先保障关键教学与通讯设施。' : 'Deploy backup generators and prioritize power for critical teaching and communications systems.');
-      }
-      const highDigital = t.strongDigitalValues.includes(state.digitalProtection);
-      if (!highDigital) {
-        actions.push(lang === 'zh' ? '准备离线备份与纸质试卷，以防网络中断。' : 'Prepare offline backups and paper exam packets in case the network fails.');
-      }
-      if (examWeek) {
-        actions.push(lang === 'zh' ? '制定考试调整方案，准备备用试卷与临时延期指令。' : 'Develop exam adjustment plans and prepare backup materials and temporary postponement orders.');
-      }
-      if (strongHurricane) {
-        actions.push(lang === 'zh' ? '加强屋顶与窗门加固，重点保护试卷、服务器与医疗保障物资。' : 'Strengthen roof and window reinforcements, protecting exam papers, servers, and medical supplies.');
-      }
-      if (state.supplyReserve === (lang === 'zh' ? '无' : 'None')) {
-        actions.push(lang === 'zh' ? '紧急补充饮用水、食品、药品等基础救援物资。' : 'Urgently replenish essential water, food, and medical supplies.');
-      }
-      if (currentMode === 'full') {
-        actions.push(lang === 'zh' ? '结合地形与离岸距离，优先布设临时防洪墙与坡面排水。' : 'Coordinate terrain and offshore distance to set up temporary flood defenses and slope drainage.');
-      }
+      const fieldLines = [
+        `${labels.educationStage}: ${state.educationStage}`,
+        `${labels.studentCount}: ${state.studentCount}`,
+        `${labels.academicTiming}: ${state.academicTiming}`,
+        `${labels.hurricaneIntensity}: ${state.hurricaneIntensity}`,
+        `${labels.floodRisk}: ${state.floodRisk}`,
+        `${labels.buildingStrength}: ${state.buildingStrength}`,
+        `${labels.powerSupport}: ${state.powerSupport}`,
+        `${labels.shelterQuality}: ${state.shelterQuality}`,
+        `${labels.supplyReserve}: ${state.supplyReserve}`,
+        `${labels.evacuationEase}: ${state.evacuationEase}`,
+        `${labels.altitude}: ${state.altitude} m`,
+        `${labels.offshoreDistance}: ${state.offshoreDistance} km`,
+        `${labels.terrainSlope}: ${state.terrainSlope}`,
+        `${labels.roofReinforcement}: ${state.roofReinforcement}`,
+        `${labels.digitalProtection}: ${state.digitalProtection}`,
+        `${labels.seasonalWindow}: ${state.seasonalWindow}`,
+        `${labels.drainageEfficiency}: ${state.drainageEfficiency}`,
+        `${labels.islandCooperation}: ${state.islandCooperation}`
+      ].join('\n');
 
-      const riskLabel = riskScore > 18 ? t.veryHighRiskLabel : riskScore > 12 ? t.highRiskLabel : t.mediumRiskLabel;
-      const assessment = `${t.assessmentIntro} ${timeWindow}${lang === 'zh' ? '，' : ', '} ${lang === 'zh' ? `${stage}的教育环境面临较高危机暴露。` : `${stage} educational environment is under elevated exposure.`}` +
-        `${lang === 'zh' ? `飓风强度 ${state.hurricaneIntensity} 级、洪水风险 ${state.floodRisk} 级，建筑坚固度为 ${state.buildingStrength} 级，${state.evacuationEase} 级撤离便捷度决定了现场响应时效性。` : `Hurricane intensity is ${state.hurricaneIntensity}, flood risk is ${state.floodRisk}, building strength is ${state.buildingStrength}, and evacuation ease is ${state.evacuationEase}.`}` +
-        `${currentMode === 'full' ? (lang === 'zh' ? `额外考虑海拔 ${state.altitude} m、离岸距离 ${state.offshoreDistance} km 以及 ${state.terrainSlope} 地形，` : `Additionally considering altitude ${state.altitude} m, offshore distance ${state.offshoreDistance} km, and ${state.terrainSlope} terrain, `) : ''}` +
-        `${lang === 'zh' ? `当前整体风险评估趋于 ${riskLabel}，需要立即部署防护与教学连续性保障措施。` : `Overall risk is assessed as ${riskLabel}, requiring immediate protection and continuity actions.`}`;
-
-      const prevention = `${t.preventionIntro} ${state.powerSupport === (lang === 'zh' ? '电力不足' : 'Power Shortage') ? t.powerShortageNote : t.powerNormalNote}${currentMode === 'full' ? ` ${t.seasonalNote}` : ''}`;
-
-      let continuity = `${t.continuityIntro} ${highDigital ? t.digitalHighNote : t.digitalLowNote} ${examWeek ? t.examWeekNote : t.normalContinuityNote}`;
-      if (lang === 'zh') {
-        continuity += stage === '大学' ? t.universityNote : stage === '高中' ? t.highSchoolNote : t.primaryNote;
-      } else {
-        continuity += stage === 'University' ? t.universityNote : stage === 'High School' ? t.highSchoolNote : t.primaryNote;
-      }
-
-      const plan = `${assessment}\n\n${prevention}\n\n${continuity}\n\n${t.estimatedRecoveryText}${recoveryText}.\n${t.actionPrefix}` +
-        actions.map(item => `- ${item}`).join('\n');
-
-      return plan;
+      return `You are a Caribbean climate crisis simulation advisor. Based on the following institution data, generate a ${promptLanguage} prevention and emergency response plan in 300-500 words. Include the following four sections: current risk assessment, prevention strategy, teaching continuity suggestions, and expected recovery timeline. Keep the tone professional, Caribbean-centric, and suitable for educational institution decision makers.\n\n${fieldLines}\n\n${closingSentence}`;
     }
 
-    function buildPlan() {
+    async function fetchOpenRouterPlan() {
+      const promptText = buildOpenRouterPrompt();
+      try {
+        const payload = {
+          model: OPENROUTER_MODEL,
+          messages: [
+            { role: 'user', content: promptText }
+          ]
+        };
+        console.log('JSON Payload:', JSON.stringify(payload));
+        const response = await fetch(OPENROUTER_API_URL, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'http://localhost:5500',
+            'X-Title': 'CC-Guard Caribbean Simulation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          console.error('OpenRouter request failed:', response.status, response.statusText);
+          const errorText = await response.text().catch(() => null);
+          if (errorText) {
+            console.error('OpenRouter error response body:', errorText);
+          }
+          if (response.status === 429) {
+            return {
+              error: true,
+              message: lang === 'zh' ? '当前推演请求过多，请稍等 10 秒后重试。' : 'System congested, please retry in 10s.'
+            };
+          }
+          return {
+            error: true,
+            message: lang === 'zh' ? `请求失败 (状态码: ${response.status})，请稍后重试。` : `Request failed (status: ${response.status}), please retry later.`
+          };
+        }
+
+        const data = await response.json();
+        const content = data?.choices?.[0]?.message?.content?.trim();
+        if (!content) {
+          return {
+            error: true,
+            message: lang === 'zh' ? 'AI 未返回可用结果，请重试。' : 'AI returned no usable result, please retry.'
+          };
+        }
+
+        return { error: false, content };
+      } catch (error) {
+        console.error('OpenRouter fetch error:', error);
+        console.error('OpenRouter error message:', error.message || error);
+        return {
+          error: true,
+          message: lang === 'zh' ? '网络请求失败，请检查连接。' : 'Network request failed, please check your connection.'
+        };
+      }
+    }
+
+    async function buildPlan() {
       updateState();
       if (!validateInputs()) {
         alert(getText('validation'));
@@ -1362,13 +1447,18 @@
       }
       setResultState('loading');
       resultSection.classList.remove('hidden');
+      startBtn.disabled = true;
       resultSection.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        const plan = generatePlan();
-        setResultState('finished', plan);
-        resultSection.classList.remove('hidden');
-        resultSection.scrollIntoView({ behavior: 'smooth' });
-      }, 80);
+
+      const result = await fetchOpenRouterPlan();
+      if (result.error) {
+        setResultState('finished', result.message);
+      } else {
+        setResultState('finished', result.content);
+      }
+
+      startBtn.disabled = false;
+      resultSection.scrollIntoView({ behavior: 'smooth' });
     }
 
     function resetScenario() {
